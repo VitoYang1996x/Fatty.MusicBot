@@ -135,8 +135,8 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
     /// </summary>
     /// <param name="volume">the volume (1 - 1000)</param>
     /// <returns>a task that represents the asynchronous operation</returns>
-    [SlashCommand("volume", description: "設定音量 (0 - 1000)%", runMode: RunMode.Async)]
-    public async Task Volume(int volume = 100)
+    [SlashCommand("volume", description: "設定音量，可以輸入1-1000(預設是40)", runMode: RunMode.Async)]
+    public async Task Volume(int volume = 40)
     {
         if (volume is > 1000 or < 0)
         {
