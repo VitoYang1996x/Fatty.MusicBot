@@ -2,7 +2,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Lavalink4NET.Extensions;
-using Fatty;
+using Fatty.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
