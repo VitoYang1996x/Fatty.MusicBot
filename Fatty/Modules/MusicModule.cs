@@ -99,7 +99,7 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 
         if (player.CurrentItem is null)
         {
-            await RespondAsync("Fatty:現在沒有在播音樂!").ConfigureAwait(false);
+            await RespondAsync("現在沒有在播音樂!").ConfigureAwait(false);
             return;
         }
 
@@ -122,12 +122,12 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 
         if (player.CurrentItem is null)
         {
-            await RespondAsync("Fatty:現在沒有在播歌!").ConfigureAwait(false);
+            await RespondAsync("現在沒有在播歌!").ConfigureAwait(false);
             return;
         }
 
         await player.StopAsync().ConfigureAwait(false);
-        await RespondAsync("Fatty:停了，現在咧?").ConfigureAwait(false);
+        await RespondAsync("停了，現在咧?").ConfigureAwait(false);
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
     {
         if (volume is > 1000 or < 0)
         {
-            await RespondAsync("Fatty:就跟你說0-1000，你給我這什麼槌子參數").ConfigureAwait(false);
+            await RespondAsync("就跟你說0-1000，你給我這什麼槌子參數").ConfigureAwait(false);
             return;
         }
 
@@ -152,7 +152,7 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
         }
 
         await player.SetVolumeAsync(volume / 100f).ConfigureAwait(false);
-        await RespondAsync($"Fatty調整音量: {volume}%").ConfigureAwait(false);
+        await RespondAsync($"調整音量: {volume}%").ConfigureAwait(false);
     }
 
     [SlashCommand("skip", description: "請Fatty切歌", runMode: RunMode.Async)]
@@ -167,7 +167,7 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 
         if (player.CurrentItem is null)
         {
-            await RespondAsync("Fatty:現在沒有在播歌!").ConfigureAwait(false);
+            await RespondAsync("現在沒有在播歌!").ConfigureAwait(false);
             return;
         }
 
@@ -177,11 +177,11 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 
         if (track is not null)
         {
-            await RespondAsync($"Fatty:切歌切歌，然後現在開始播: {track.Track!.Uri}").ConfigureAwait(false);
+            await RespondAsync($"切歌切歌，然後現在開始播: {track.Track!.Uri}").ConfigureAwait(false);
         }
         else
         {
-            await RespondAsync("Fatty:都給你切完了").ConfigureAwait(false);
+            await RespondAsync("都給你切完了").ConfigureAwait(false);
         }
     }
 
@@ -197,12 +197,12 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 
         if (player.State is PlayerState.Paused)
         {
-            await RespondAsync("Fatty:啊就已經暫停了你是在").ConfigureAwait(false);
+            await RespondAsync("啊就已經暫停了你是在").ConfigureAwait(false);
             return;
         }
 
         await player.PauseAsync().ConfigureAwait(false);
-        await RespondAsync("Fatty:好，我暫停一下").ConfigureAwait(false);
+        await RespondAsync("好，我暫停一下").ConfigureAwait(false);
     }
 
     [SlashCommand("resume", description: "讓Fatty繼續播歌", runMode: RunMode.Async)]
@@ -217,12 +217,12 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 
         if (player.State is not PlayerState.Paused)
         {
-            await RespondAsync("Fatty:啊就已經在播了你是在").ConfigureAwait(false);
+            await RespondAsync("啊就已經在播了你是在").ConfigureAwait(false);
             return;
         }
 
         await player.ResumeAsync().ConfigureAwait(false);
-        await RespondAsync("Fatty:好，我繼續播放").ConfigureAwait(false);
+        await RespondAsync("好，我繼續播放").ConfigureAwait(false);
     }
 
     /// <summary>
