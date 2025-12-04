@@ -2,8 +2,10 @@
 using Lavalink4NET;
 using Lavalink4NET.DiscordNet;
 using Lavalink4NET.Players;
+using Lavalink4NET.Players.Preconditions;
 using Lavalink4NET.Players.Vote;
 using Lavalink4NET.Rest.Entities.Tracks;
+using Microsoft.Extensions.Logging;
 
 namespace Fatty.Modules;
 
@@ -11,6 +13,7 @@ namespace Fatty.Modules;
 public class MusicModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IAudioService _audioService;
+    private readonly ILogger<MusicModule> _logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="MusicModule"/> class.
@@ -19,11 +22,12 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
     /// <exception cref="ArgumentNullException">
     ///     thrown if the specified <paramref name="audioService"/> is <see langword="null"/>.
     /// </exception>
-    public MusicModule(IAudioService audioService)
+    public MusicModule(IAudioService audioService, ILogger<MusicModule> logger)
     {
         ArgumentNullException.ThrowIfNull(audioService);
 
         _audioService = audioService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -33,7 +37,7 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("disconnect", "請Fatty離開，無論他在哪裡", runMode: RunMode.Async)]
     public async Task Disconnect()
     {
-        var player = await GetPlayerAsync().ConfigureAwait(false);
+        var player = await GetPlayerAsync(connectToVoiceChannel: false).ConfigureAwait(false);
 
         if (player is null)
         {
@@ -41,7 +45,7 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
         }
 
         await player.DisconnectAsync().ConfigureAwait(false);
-        await RespondAsync("Disconnected.").ConfigureAwait(false);
+        await RespondAsync("債建").ConfigureAwait(false);
     }
 
     /// <summary>
@@ -138,16 +142,17 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("volume", description: "設定音量，可以輸入1-1000(預設是40)", runMode: RunMode.Async)]
     public async Task Volume(int volume = 40)
     {
-        if (volume is > 1000 or < 0)
-        {
-            await RespondAsync("就跟你說0-1000，你給我這什麼槌子參數").ConfigureAwait(false);
-            return;
-        }
 
         var player = await GetPlayerAsync(connectToVoiceChannel: false).ConfigureAwait(false);
 
         if (player is null)
         {
+            return;
+        }
+
+        if (volume is > 1000 or < 0)
+        {
+            await RespondAsync("就跟你說0-1000，你給我這什麼槌子參數").ConfigureAwait(false);
             return;
         }
 
@@ -243,16 +248,27 @@ public class MusicModule : InteractionModuleBase<SocketInteractionContext>
             .RetrieveAsync(Context, playerFactory: PlayerFactory.Vote, retrieveOptions)
             .ConfigureAwait(false);
 
+        _logger.LogInformation($"[GetPlayerAsync] retrieve Result: {result.Status}");
+
         if (!result.IsSuccess)
         {
             var errorMessage = result.Status switch
             {
-                PlayerRetrieveStatus.UserNotInVoiceChannel => "You are not connected to a voice channel.",
-                PlayerRetrieveStatus.BotNotConnected => "The bot is currently not connected.",
+                PlayerRetrieveStatus.UserNotInVoiceChannel => "你要先進頻道啊",
+                PlayerRetrieveStatus.BotNotConnected => "Fatty不在頻道裡面你猜猜看為什麼",
+
+                PlayerRetrieveStatus.PreconditionFailed when result.Precondition == PlayerPrecondition.Playing => "Fatty現在正在忙",
+                PlayerRetrieveStatus.PreconditionFailed when result.Precondition == PlayerPrecondition.NotPaused => "啊就已經暫停了你是想要?",
+                PlayerRetrieveStatus.PreconditionFailed when result.Precondition == PlayerPrecondition.Paused => "啊就沒有暫停",
+                PlayerRetrieveStatus.PreconditionFailed when result.Precondition == PlayerPrecondition.QueueEmpty => "沒歌啦老哥",
+
                 _ => "Unknown error.",
+
             };
 
-            await FollowupAsync(errorMessage).ConfigureAwait(false);
+            _logger.LogInformation($"[GetPlayerAsync] errorMessage: {errorMessage}");
+
+            await RespondAsync(errorMessage).ConfigureAwait(false);
             return null;
         }
 
